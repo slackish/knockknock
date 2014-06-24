@@ -1,0 +1,8 @@
+[Core]
+Name = Login Item Scanner
+Module = loginItem
+
+[Documentation]
+Author = Patrick W
+Version = 1.0
+Description = Plugin that scans for login items

@@ -1,0 +1,8 @@
+[Core]
+Name = Login/Logout Hook Scanner
+Module = logHook
+
+[Documentation]
+Author = Patrick W
+Version = 1.0
+Description = Plugin that scans for any login/logout hooks

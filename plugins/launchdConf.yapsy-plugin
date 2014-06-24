@@ -1,0 +1,8 @@
+[Core]
+Name = LaunchD Conf Scanner
+Module = launchdConf
+
+[Documentation]
+Author = Patrick W
+Version = 1.0
+Description = Plugin that parses /etc/launchd.conf for embedded commands

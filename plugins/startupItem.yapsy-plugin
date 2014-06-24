@@ -1,0 +1,8 @@
+[Core]
+Name = Startup Items Scanner
+Module = startupItem
+
+[Documentation]
+Author = Patrick W
+Version = 1.0
+Description = Plugin that scans for startup items
