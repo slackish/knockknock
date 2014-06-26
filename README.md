@@ -1,4 +1,4 @@
-knockknock - who's there?
+knockknock (beta) - who's there?
 ==========
 
 tl;dr
@@ -40,3 +40,10 @@ The -w command instructs KnockKnock to include white-listed binaries and command
 The -l command lists all plugins that are registered with KnockKnock. (Recall that there generally is one plugin per persistence class). As previously mentioned this command is often ran to determine the name of a plugin to pass to the -p command.
 
 The -j command instructs KnockKnock to produce output in JSON format. This may be useful for post processing the output.
+
+Other notes:
+
+1) KnockKnock is currently in beta - please report any issues/suggestions/comments.
+2) KnockKnock should be executed with the version of Python that was installed by Apple (/usr/bin/python) - as opposed to another version (e.g. Homebrew).
+   It may work with other version, but requires the 'objc' python module. For a python installed with Homebrew, install the 'objc' python module via: pip install pyobjc
+3) KnockKnock was designed for OS X Mavericks...it should work on older versions of the OS, but please report any issues!

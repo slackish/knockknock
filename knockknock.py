@@ -184,6 +184,16 @@ def initKK():
 		#dbg msg
 		utils.logMessage(utils.MODE_INFO, '%.1f is a supported OS X version' % (utils.getOSVersion()))
 
+	#load python <-> Objc bindings
+	# ->might fail if non-Apple version of python is being used
+	if not utils.loadObjcBindings():
+
+		#dbg msg
+		utils.logMessage(utils.MODE_ERROR, 'python <-> Objc bindings/module not installed\n       run via /usr/bin/python or install modules via \'pip install pyobjc\' to fix')
+
+		#bail
+		return False
+
 	#load whitelists
 	whitelist.loadWhitelists()
 

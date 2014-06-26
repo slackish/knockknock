@@ -1,14 +1,12 @@
 __author__ = 'patrick'
 
 import os
-import objc
 import json
 import glob
 import ctypes
 import fnmatch
 import hashlib
 import platform
-import Foundation
 import ctypes.util
 
 #min supported OS X version
@@ -71,6 +69,39 @@ kSecCSDoNotValidateResources = 1 << 2
 kSecCSBasicValidateOnly = kSecCSDoNotValidateExecutable | kSecCSDoNotValidateResources
 kSecCSCheckNestedCode = 1 << 3
 '''
+
+
+#load python <-> Objc bindings
+# ->might fail if non-Apple version of python is being used
+def loadObjcBindings():
+
+	#imports must be global
+	# ->ensures rest of code can access em
+	global objc
+	global Foundation
+
+	#flag indicating load OK
+	loadOK = False
+
+	#wrap
+	try:
+
+		#attempt imports
+ 		import objc
+		import Foundation
+
+		#set flag
+		# ->load OK
+		loadOK = True
+
+	#imports not found
+	except ImportError, e:
+
+		#set flag
+		# ->load not OK
+		loadOK = False
+
+	return loadOK
 
 
 #set verbose
