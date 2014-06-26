@@ -1,10 +1,12 @@
 knockknock (beta) - who's there?
 ==========
 
-tl;dr
+[see http://syn.ac/shakacon for PDF slides on OS X malware, persistence, and KnockKnock]
+
+tl;dr/quick start
 to enumerate all persistent binaries, simply run:
 
-$ python knockknock.py
+<b>$ python knockknock.py</b>
 
 
 KnockKnock is command line python script that displays persistent OS X binaries that are set to execute automatically at each boot. Since KnockKnock takes an unbiased approach it can generically detect persist OS X malware, both today, and in the future. It should be noted though, this approach will also list legitimate binaries. However, as KnockKnock by default, will filter out unmodified Apple-signed binaries, the output is greatly reduced, leaving a handful of binaries that quickly can be examined and manually verified.
@@ -44,6 +46,8 @@ The -j command instructs KnockKnock to produce output in JSON format. This may b
 Other notes:
 
 1) KnockKnock is currently in beta - please report any issues/suggestions/comments.
+
 2) KnockKnock should be executed with the version of Python that was installed by Apple (/usr/bin/python) - as opposed to another version (e.g. Homebrew).
    It may work with other version, but requires the 'objc' python module. For a python installed with Homebrew, install the 'objc' python module via: pip install pyobjc
+   
 3) KnockKnock was designed for OS X Mavericks...it should work on older versions of the OS, but please report any issues!
