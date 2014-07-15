@@ -170,12 +170,20 @@ def getKKDirectory():
 
 
 #get a bundle's executable binary
+# ->returns None if not found
 def getBinaryFromBundle(bundlePath):
+
+	#executable's path
+	binaryPath = None
 
 	#get main bundle
 	mainBundle = Foundation.NSBundle.bundleWithPath_(bundlePath)
+	if not mainBundle:
 
-	return mainBundle.executablePath()
+		#extract executable path
+		binaryPath = mainBundle.executablePath()
+
+	return binaryPath
 
 
 #given a list of path, expand any '~'s into all users

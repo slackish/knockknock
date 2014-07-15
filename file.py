@@ -20,7 +20,7 @@ class File():
 		self.bundle = None
 
 		#if its a directory (e.g. an app)
-		# ->get binary (from info.plist)
+		# ->get binary (from app's Info.plist)
 		if os.path.isdir(path):
 
 			#save bundle path
@@ -29,9 +29,18 @@ class File():
 			#get path
 			self.path = utils.getBinaryFromBundle(path)
 
+			#if binary could not be found
+			# ->default to 'unknown'
+			if not self.path:
+
+				#set to defaul
+				self.path = "<unknown>"
+
+		#path is to file
+		# ->just save into class var
 		else:
 
-			#save path
+			#save
 			self.path = path
 
 		#convert file path to utf-8 if needed
