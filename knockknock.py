@@ -97,7 +97,7 @@ def knocknock():
 
 						#by default, ignore whitelisted binaries
 						# ->ignore if already saved though
-						elif not args.whitelist and startupObj.whitelistInfo:
+						elif not args.whitelist and startupObj.isWhitelisted:
 
 							#save
 							ignoredFiles.append(startupObj)
@@ -107,7 +107,7 @@ def knocknock():
 					if isinstance(startupObj, command.Command):
 
 						#by default, ignore whitelisted commands
-						if not args.whitelist and startupObj.whitelisted:
+						if not args.whitelist and startupObj.isWhitelisted:
 
 							#save
 							ignoredCommands.append(startupObj)

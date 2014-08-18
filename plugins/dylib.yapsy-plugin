@@ -1,0 +1,8 @@
+[Core]
+Name = (inserted) Dynamic Library scanner
+Module = dylib
+
+[Documentation]
+Author = Patrick W
+Version = 1.0
+Description = Plugin that scans for dynamic libraries that will be loaded via DYLD_INSERT_LIBRARIES

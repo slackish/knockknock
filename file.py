@@ -14,12 +14,12 @@ class File():
 
 	#init method
 	# ->init instance variables, hash file, etc
-	def __init__(self, path, plist=None):
+	def __init__(self, path, plist=None, parent=None):
 
 		#init path for bundle
 		self.bundle = None
 
-		#if its a directory (e.g. an app)
+		#if its a directory (e.g. an app bundle)
 		# ->get binary (from app's Info.plist)
 		if os.path.isdir(path):
 
@@ -33,8 +33,8 @@ class File():
 			# ->default to 'unknown'
 			if not self.path:
 
-				#set to defaul
-				self.path = "<unknown>"
+				#just set to something...
+				self.path = '<unknown>'
 
 		#path is to file
 		# ->just save into class var
@@ -50,7 +50,7 @@ class File():
 			self.path = self.path.encode('utf-8')
 
 		#save plist
-		# ->this will be set for launch daemons/agents
+		# ->this will be set for launch daemons/agents, inserted dylibs, etc
 		self.plist = plist
 
 		#compute/save name
@@ -62,18 +62,18 @@ class File():
 		#compute/save size
 		self.size = os.path.getsize(self.path)
 
-		#init whitelist info
-		self.whitelistInfo = None
+		#init whitelist flag
+		self.isWhitelisted = False
 
 		#init signing authorities
 		self.signingAuthorities = None
 
 		#check if its whitelisted
-		# ->hash is key for whitelist info
-		if self.hash in whitelist.whitelistedFiles:
+		# ->path is key
+		if self.path in whitelist.whitelistedFiles:
 
-			#grab whitelist info
-		 	self.whitelistInfo = whitelist.whitelistedFiles[self.hash]
+			#check if hash is in white list
+		 	self.isWhitelisted = (self.hash in whitelist.whitelistedFiles[self.path])
 
 		#init
 		self.signatureStatus = utils.errSecCSUnsigned

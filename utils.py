@@ -1,12 +1,15 @@
 __author__ = 'patrick'
 
 import os
-import json
+import sys
 import glob
 import ctypes
 import fnmatch
 import hashlib
 import platform
+import plistlib
+import traceback
+import subprocess
 import ctypes.util
 
 #min supported OS X version
@@ -168,20 +171,75 @@ def getKKDirectory():
 	#return script's directory
 	return os.path.dirname(os.path.realpath(__file__)) + '/'
 
+#load a bundle's Info.plist
+def loadInfoPlist(bundlePath):
+
+	#dictionary info
+	infoDictionary = None
+
+	#wrap
+	# ->had some issues with bundleWithPath_()
+	try:
+
+		#get main bundle
+		mainBundle = Foundation.NSBundle.bundleWithPath_(bundlePath)
+		if mainBundle is not None:
+
+			#get dictionary from Info.plist
+			infoDictionary = mainBundle.infoDictionary()
+
+	#ignore
+	except:
+
+		pass
+
+	return infoDictionary
+
+#given a loaded plist (e.g. from a bundle)
+# ->returns the path of the Info.plist
+def getPathFromPlist(loadedPlist):
+
+	#path to plist
+	plistPath = None
+
+	#wrap
+	try:
+
+		#check for Info plist key
+		if 'CFBundleInfoPlistURL' in loadedPlist:
+
+			#extract the path
+			plistPath =  loadedPlist['CFBundleInfoPlistURL'].fileSystemRepresentation()
+
+	#ignore
+	except:
+
+		pass
+
+	return plistPath
+
 
 #get a bundle's executable binary
-# ->returns None if not found
 def getBinaryFromBundle(bundlePath):
 
 	#executable's path
 	binaryPath = None
 
-	#get main bundle
-	mainBundle = Foundation.NSBundle.bundleWithPath_(bundlePath)
-	if not mainBundle:
+	#wrap
+	# ->had some issues with bundleWithPath_()
+	try:
 
-		#extract executable path
-		binaryPath = mainBundle.executablePath()
+		#get main bundle
+		mainBundle = Foundation.NSBundle.bundleWithPath_(bundlePath)
+		if mainBundle is not None:
+
+			#extract executable path
+			binaryPath = mainBundle.executablePath()
+
+	#ignore
+	except:
+
+		pass
 
 	return binaryPath
 
@@ -308,15 +366,20 @@ def isKext(path):
 	#wrap
 	try:
 
-		#find Info.plist
-		infoPlist = findFiles(path, 'Info.plist')[0]
+		#load Info.plist
+		infoPlist = loadInfoPlist(path)
+		if infoPlist is not None and 'CFBundlePackageType' in infoPlist:
 
-		#load plist and check 'CFBundlePackageType' for 'KEXT'
-		bundleIsKext = (loadPlist(infoPlist)['CFBundlePackageType'] == 'KEXT')
+			#extact package type
+			packageType = infoPlist['CFBundlePackageType']
 
+			#load plist and check 'CFBundlePackageType' for 'KEXT'
+			bundleIsKext = (packageType.upper() == 'KEXT')
 
 	#ignore exceptions
 	except Exception, e:
+
+		print e
 
 		#ignore
 		pass
@@ -391,7 +454,7 @@ def checkSignature(file, bundle=None):
 	if errSecSuccess != result:
 
 		#error
-		logMessage(MODE_ERROR, 'SecStaticCodeCreateWithPath() failed with %d' % result)
+		logMessage(MODE_ERROR, 'SecStaticCodeCreateWithPath(\'%s\') failed with %d' % (path, result))
 
 		#bail
 		return (status, None, None)
@@ -669,48 +732,153 @@ def parseBashFile(filePath):
 
 	return commands
 
+
+def findBundles(startDirectory, pattern, depth):
+
+	#list of files
+	matchedBundles = []
+
+	#initial depth of starting dir
+	# simply count '/'
+	initialDepth = startDirectory.count(os.path.sep)
+
+	#get all directories under directory
+	# ->walk top down, so depth checks work
+	for root, dirnames, filenames in os.walk(startDirectory, topdown=True):
+
+		#check depth
+		# ->null out remaining dirname if depth is hit
+		if root.count(os.path.sep) - initialDepth >= depth:
+
+			#null out
+			dirnames[:] = []
+
+		#filter directories
+		# ->want a bundle that matches the pattern
+		for dir in dirnames:
+
+			#full path
+			fullPath = os.path.join(root, dir)
+
+			#check if matches patter and is a bundle
+			if pattern in dir and Foundation.NSBundle.bundleWithPath_(fullPath):
+
+				#save
+				matchedBundles.append(fullPath)
+
+	return matchedBundles
+
+
+#get all installed apps
+# ->invokes system_profiler/SPApplicationsDataType
+def getInstalledApps():
+
+	#list of apps
+	installedApps = None
+
+	#wrap
+	try:
+
+		#get info about all installed apps via 'system_profiler'
+		# ->(string)output is read in as plist
+		systemProfileInfo = plistlib.readPlistFromString(subprocess.check_output(['system_profiler', 'SPApplicationsDataType', '-xml']))
+
+		#get all installed apps
+		# ->under '_items' key
+		installedApps = systemProfileInfo[0]['_items']
+
+	#exception
+	except Exception, e:
+
+		#reset
+		installedApps = None
+
+		#err msg
+		#logMessage(MODE_ERROR, '\n EXCEPTION, %s() threw: %s' % (sys._getframe().f_code.co_name, e))
+		#traceback.print_exc()
+
+	return installedApps
+
+
+
+
 #recursively find files
 # from: http://stackoverflow.com/questions/2186525/use-a-glob-to-find-files-recursively-in-python
-def findFiles(directory, pattern):
+'''
+def findFiles(startDirectory, pattern, depth):
+
+	#initial depth of starting dir
+	# simply count '/'
+	initialDepth = startDirectory.count(os.path.sep)
+
+	#list of all files
+	files = []
 
 	#list of files
 	matchedFiles = []
 
 	#get all files under directory
-	for root, dirnames, filenames in os.walk(directory):
+	for root, dirnames, filenames in os.walk(startDirectory, topdown=True):
 
+		print 'ROOT: ' + root
+		if root.count(os.path.sep) - initialDepth == depth:
+
+			#files += [os.path.join(root, d) for d in dirnames]
+			dirnames[:] = []
+
+		print 'DIRS: %s' % dirnames
+		print filenames
 		#get all files that match
 		for filename in fnmatch.filter(filenames, pattern):
 
 			#save em
 			matchedFiles.append(os.path.join(root, filename))
 
+	#print matchedFiles
+
 	return matchedFiles
+'''
 
 #hash (MD5) a file
 # from: http://stackoverflow.com/questions/7829499/using-hashlib-to-compute-md5-digest-of-a-file-in-python-3
 def md5sum(filename):
 
-	#open
-	with open(filename, mode='rb') as f:
+	#md5 hash
+	digest = None
 
-		#init hash
-		d = hashlib.md5()
+	#wrap
+	try:
 
-		#read in/hash
-		while True:
+		#open
+		with open(filename, mode='rb') as f:
 
-			#read in chunk
-			buf = f.read(4096)
+			#init hash
+			d = hashlib.md5()
 
-			#eof?
-			if not buf:
-				#bail
-				break
+			#read in/hash
+			while True:
 
-			#update
-			d.update(buf)
+				#read in chunk
+				buf = f.read(4096)
 
-	return unicode(d.hexdigest())
+				#eof?
+				if not buf:
+					#bail
+					break
+
+				#update
+				d.update(buf)
+
+			#grab hash
+			digest = unicode(d.hexdigest())
+
+	#exception
+	except Exception, e:
+
+		#reset
+		digest = None
+
+	return digest
+
 
 

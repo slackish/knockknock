@@ -16,7 +16,7 @@ class Command():
 
 		#init whitelist flag
 		# ->simply set to True if command is list of whitelisted commands
-		self.whitelisted = (self.command in whitelist.whitelistedCommands)
+		self.isWhitelisted = (self.command in whitelist.whitelistedCommands)
 
 		return
 
