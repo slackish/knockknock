@@ -26,6 +26,7 @@ optional arguments:
   -w, --whitelist       		include white-listed binaries
   -l, --list            		list all plugins
   -j, --json            		produce output in JSON format
+  -P POST, --json POST          post json results to a webserver
 
 The extra command line arguments are all optional, and hopefully self-explanatory. However, they are described here for completeness. 
 
@@ -42,6 +43,8 @@ The -w command instructs KnockKnock to include white-listed binaries and command
 The -l command lists all plugins that are registered with KnockKnock. (Recall that there generally is one plugin per persistence class). As previously mentioned this command is often ran to determine the name of a plugin to pass to the -p command.
 
 The -j command instructs KnockKnock to produce output in JSON format. This may be useful for post processing the output.
+
+The -P command implies -j and posts results to a webserver.  Useful for network collection of data.
 
 Other notes:
 
